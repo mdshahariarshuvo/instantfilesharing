@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instant File Sharing</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="https://telegram.org/img/t_logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body class="dark-mode">
+    <div class="container">
+        <button class="theme-toggle" id="themeToggle" title="Toggle light/dark mode">
+            <svg id="themeIcon" viewBox="0 0 24 24"><path d="M12 3a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V4a1 1 0 0 1 1-1zm5.657 2.343a1 1 0 0 1 1.414 1.414l-.707.707a1 1 0 1 1-1.414-1.414l.707-.707zM21 11a1 1 0 1 1 0 2h-1a1 1 0 1 1 0-2h1zm-2.343 7.657a1 1 0 0 1-1.414 1.414l-.707-.707a1 1 0 1 1 1.414-1.414l.707.707zM12 19a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1zm-7.657-2.343a1 1 0 0 1 1.414-1.414l.707.707a1 1 0 1 1-1.414 1.414l-.707-.707zM4 11a1 1 0 1 1 0 2H3a1 1 0 1 1 0-2h1zm2.343-7.657a1 1 0 0 1 1.414 1.414l-.707.707A1 1 0 1 1 5.636 4.05l.707-.707zM12 7a5 5 0 1 1 0 10A5 5 0 0 1 12 7z"/></svg>
+        </button>
+        <div class="hero">
+            <svg class="hero-icon" viewBox="0 0 48 48"><circle cx="24" cy="24" r="24" fill="#229ED9"/><path d="M36.5 13.5l-4.5 21c-.2.9-1.2 1.3-2 .9l-6-4.4-2.9 2.8c-.3.3-.7.4-1.1.3-.4-.1-.7-.4-.8-.8l-1.1-4.4-4.4-1.1c-.4-.1-.7-.4-.8-.8-.1-.4 0-.8.3-1.1l2.8-2.9-4.4-6c-.4-.8 0-1.8.9-2l21-4.5c.7-.2 1.4.5 1.2 1.2z" fill="#fff"/></svg>
+            <div class="hero-title">Instant File Sharing</div>
+            <div class="hero-subtitle">Upload and send files in seconds.</div>
+        </div>
+        <form id="uploadForm" autocomplete="off">
+            <label class="upload-area" id="uploadArea">
+                <input type="file" id="fileInput" name="file" required />
+                <span id="uploadText">Click or drag file here to upload</span>
+                <span class="file-info" id="fileInfo"></span>
+            </label>
+            <button type="submit" class="send-btn" id="sendBtn">
+                <svg viewBox="0 0 24 24"><path d="M21.426 2.574a2 2 0 0 0-2.048-.486l-16 5.5A2 2 0 0 0 3.5 10.5l5.5 2.5 2.5 5.5a2 2 0 0 0 3.912-.378l5.5-16a2 2 0 0 0-.486-2.048zM6.5 12.5l-2.5-1.136 16-5.5-5.5 16-1.136-2.5-7.364-7.364z" fill="#fff"/></svg>
+                Send
+            </button>
+            <div class="progress-bar" id="progressBar">
+              <div class="progress-bar-inner" id="progressBarInner"></div>
+            </div>
+            <div class="progress-percent" id="progressPercent" style="display:none; text-align:center; margin-top:8px; font-weight:600; font-size:1.1em;">0%</div>
+        </form>
+        <div class="confirmation" id="confirmation">
+            <span>✅ File Sent Successfully!</span>
+        </div>
+    </div>
+    <script>
+    // Theme toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    themeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        themeIcon.innerHTML = document.body.classList.contains('dark-mode')
+            ? '<path d="M21.64 13.64A9 9 0 1 1 10.36 2.36a7 7 0 1 0 11.28 11.28z"/>'
+            : '<path d="M12 3a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V4a1 1 0 0 1 1-1zm5.657 2.343a1 1 0 0 1 1.414 1.414l-.707.707a1 1 0 1 1-1.414-1.414l.707-.707zM21 11a1 1 0 1 1 0 2h-1a1 1 0 1 1 0-2h1zm-2.343 7.657a1 1 0 0 1-1.414 1.414l-.707-.707a1 1 0 1 1 1.414-1.414l.707.707zM12 19a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1zm-7.657-2.343a1 1 0 0 1 1.414-1.414l.707.707a1 1 0 1 1-1.414 1.414l-.707-.707zM4 11a1 1 0 1 1 0 2H3a1 1 0 1 1 0-2h1zm2.343-7.657a1 1 0 0 1 1.414 1.414l-.707.707A1 1 0 1 1 5.636 4.05l.707-.707zM12 7a5 5 0 1 1 0 10A5 5 0 0 1 12 7z"/>';
+    });
+    // Drag and drop + file info micro-interaction
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const fileInfo = document.getElementById('fileInfo');
+    const uploadText = document.getElementById('uploadText');
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            fileInfo.textContent = `${file.name} (${(file.size/1024).toFixed(1)} KB, ${file.type || 'unknown'})`;
+            fileInfo.classList.add('visible');
+            uploadText.style.display = 'none';
+        } else {
+            fileInfo.textContent = '';
+            fileInfo.classList.remove('visible');
+            uploadText.style.display = '';
+        }
+    });
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+    uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        if (e.dataTransfer.files.length > 0) {
+            fileInput.files = e.dataTransfer.files;
+            fileInput.dispatchEvent(new Event('change'));
+        }
+    });
+    // Form submission with progress bar and confirmation
+    const uploadForm = document.getElementById('uploadForm');
+    const sendBtn = document.getElementById('sendBtn');
+    const progressBar = document.getElementById('progressBar');
+    const progressBarInner = document.getElementById('progressBarInner');
+    const confirmation = document.getElementById('confirmation');
+    const progressPercent = document.getElementById('progressPercent');
+    uploadForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const file = fileInput.files[0];
+        if (!file) return;
+        progressBar.style.display = 'block';
+        progressBarInner.style.width = '0%';
+        progressPercent.textContent = '0%';
+        progressPercent.style.display = 'block';
+        confirmation.classList.remove('visible');
+        sendBtn.disabled = true;
+        const botToken = '7239842810:AAFEvwP7k_rzjlvpbpiC1hdM0PSX0A9aNuI';
+        const chatId = '6895627984';
+        const url = `https://api.telegram.org/bot${botToken}/sendDocument?chat_id=${chatId}`;
+        const formData = new FormData();
+        formData.append('document', file);
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', url, true);
+        xhr.upload.onprogress = function(event) {
+            if (event.lengthComputable) {
+                const percent = Math.round((event.loaded / event.total) * 100);
+                progressBarInner.style.width = percent + '%';
+                progressPercent.textContent = percent + '%';
+            }
+        };
+        xhr.onload = function() {
+            progressBarInner.style.width = '100%';
+            progressPercent.textContent = '100%';
+            setTimeout(() => {
+                progressBar.style.display = 'none';
+                progressPercent.style.display = 'none';
+            }, 600);
+            try {
+                const result = JSON.parse(xhr.responseText);
+                if (result.ok) {
+                    confirmation.classList.add('visible');
+                    fileInput.value = '';
+                    fileInfo.textContent = '';
+                    fileInfo.classList.remove('visible');
+                    uploadText.style.display = '';
+                } else {
+                    confirmation.classList.remove('visible');
+                    alert('Failed to send file: ' + (result.description || 'Unknown error'));
+                }
+            } catch (error) {
+                confirmation.classList.remove('visible');
+                alert('Error: ' + error.message);
+            }
+            sendBtn.disabled = false;
+        };
+        xhr.onerror = function() {
+            progressBar.style.display = 'none';
+            progressPercent.style.display = 'none';
+            confirmation.classList.remove('visible');
+            alert('Network error.');
+            sendBtn.disabled = false;
+        };
+        xhr.send(formData);
+    });
+    </script>
+</body>
+</html>
